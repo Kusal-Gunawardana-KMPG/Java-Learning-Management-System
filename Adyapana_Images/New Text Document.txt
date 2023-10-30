@@ -1,0 +1,60 @@
+String firstname = firstNameFieldStudentRegistration.getText();
+        String lastname = lastNameFieldStudentRegistration.getText();
+        String mobile = mobileFieldStudentRegistration.getText();
+        String email = emailFieldStudentRegistration.getText();
+        String address = addressFieldStudentRegistration.getText();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+String subject1 = String.valueOf(subject1ComboBox.getSelectedItem());
+ButtonModel genderSelection = buttonGroupStudentRegistration.getSelection();
+if (firstname.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please Enter Students First Name", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (lastname.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please Enter Students Last Name", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (mobile.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please Enter Students Mobile Number", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (dateChooserStudentRegistration.getDate() == null) {
+            JOptionPane.showMessageDialog(this, "Please Select Students Date of Birth", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (email.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please Enter Students Email Address", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (!email.matches("^(?=.{1,64}@)[A-Za-z0-9\\+_-]+(\\.[A-Za-z0-9\\+_-]+)*@"
+                + "[^-][A-Za-z0-9\\+-]+(\\.[A-Za-z0-9\\+-]+)*(\\.[A-Za-z]{2,})$")) {
+            JOptionPane.showMessageDialog(this, "Invalid Email", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (address.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please Enter Students Address", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (genderSelection == null) {
+            JOptionPane.showMessageDialog(this, "Please Select Students Gender", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (subject1.equals("Select")) {
+            JOptionPane.showMessageDialog(this, "Please Select a Subject", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else {
+
+            String genderId = genderSelection.getActionCommand();
+
+            int subject1Id = subject1Map.get(subject1);
+
+try {
+
+                String dob = dateFormat.format(dateChooserStudentRegistration.getDate());
+
+                MySQL.execute("INSERT INTO"
+                        + "`student` (`firstName`,`lastName`,`mobile`,`address`,`gender_id`,`email`,`dob`)"
+                        + "VALUES('" + firstname + "','" + lastname + "','" + mobile + "','" + address + "'," + genderId + ",'" + email + "','" + dob + "')");
+                ResultSet resultset = MySQL.execute("SELECT MAX(`sno`) as last_sno from `student`");
+
+                while (resultset.next()) {
+                    int lastSno = resultset.getInt("last_sno");
+
+                    MySQL.execute("INSERT INTO `student_has_subject` (`student_sno`,`subject_subno`)"
+                            + "VALUES('" + lastSno + "','" + subject1Id + "')");
+                }
+                loadStudents();
+                loadSubjects();
+                countStudents();
+                countTeachers();
+                reset();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
